@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Isma\ApiFiltersBundle\Tests;
+namespace Isma\ApiFiltersBundle\Tests\Unit;
 
 use Isma\ApiFiltersBundle\ApiFiltersBundle;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +21,6 @@ class ApiFiltersBundleTest extends TestCase
     {
         $bundle = new ApiFiltersBundle();
 
-        $this->assertSame(\dirname(__DIR__), $bundle->getPath());
+        $this->assertSame(\dirname(__DIR__, 2), $bundle->getPath());
     }
 }

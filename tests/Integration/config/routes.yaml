@@ -1,0 +1,5 @@
+controllers:
+    resource:
+        path: ../Resolver/
+        namespace: Isma\ApiFiltersBundle\Tests\Integration\Resolver
+    type: attribute
