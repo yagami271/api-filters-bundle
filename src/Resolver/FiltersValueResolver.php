@@ -113,29 +113,29 @@ final class FiltersValueResolver implements ValueResolverInterface
         }
 
         if (\is_array($value)) {
-            return array_map(fn (mixed $v): string => $this->castEnum($fieldName, $v, $apiFilter), array_values($value));
+            return array_map(fn (mixed $v): string|int => $this->castEnum($fieldName, $v, $apiFilter->enumClass), array_values($value));
         }
 
-        return $this->castEnum($fieldName, $value, $apiFilter);
+        return $this->castEnum($fieldName, $value, $apiFilter->enumClass);
     }
 
-    private function castEnum(string $fieldName, mixed $value, ApiFilter $apiFilter): string
+    /**
+     * @param class-string<\BackedEnum> $enumClass
+     */
+    private function castEnum(string $fieldName, mixed $value, string $enumClass): string|int
     {
-        if (null === $apiFilter->enumClass) {
-            throw new InvalidFilterException(\sprintf('Filter "%s" is configured as Enum but no enumClass is provided.', $fieldName));
-        }
-
         if (!\is_string($value) && !\is_int($value)) {
             throw new InvalidFilterException(\sprintf('Invalid enum value for filter "%s".', $fieldName));
         }
 
-        $enumClass = $apiFilter->enumClass;
-        $case = $enumClass::tryFrom((string) $value);
+        $backingType = (new \ReflectionEnum($enumClass))->getBackingType();
+        $castedValue = 'int' === $backingType?->getName() ? (int) $value : (string) $value;
+        $case = $enumClass::tryFrom($castedValue);
 
         if (null === $case) {
             throw new InvalidFilterException(\sprintf('Invalid enum value "%s" for filter "%s".', $value, $fieldName));
         }
 
-        return (string) $case->value;
+        return $case->value;
     }
 }

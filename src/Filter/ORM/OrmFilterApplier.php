@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Isma\ApiFiltersBundle\Filter\ORM;
 
+use Doctrine\ORM\QueryBuilder;
 use Isma\ApiFiltersBundle\Exception\DuplicateFilterStrategyException;
 use Isma\ApiFiltersBundle\Filter\FilterApplierInterface;
 use Isma\ApiFiltersBundle\Filter\FilterStrategyInterface;
@@ -33,8 +34,9 @@ final class OrmFilterApplier implements FilterApplierInterface
         $this->strategies = $map;
     }
 
-    public function apply(object $queryBuilder, Filters $filters, array $mapping): void
+    public function apply(QueryBuilder $queryBuilder, Filters $filters, array $mapping): void
     {
+        $uid = bin2hex(random_bytes(4));
         $paramIndex = 0;
 
         foreach ($filters->filters as $filter) {
@@ -47,7 +49,7 @@ final class OrmFilterApplier implements FilterApplierInterface
             }
 
             $column = $mapping[$filter->name];
-            $parameterName = 'filter_'.$paramIndex++;
+            $parameterName = \sprintf('filter_%s_%d', $uid, $paramIndex++);
 
             $this->strategies[$filter->type]->apply($queryBuilder, $column, $filter->value, $parameterName);
         }

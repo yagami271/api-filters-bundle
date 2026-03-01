@@ -4,7 +4,7 @@ A Symfony bundle that resolves API query filters from HTTP requests and applies 
 
 ## Requirements
 
-- PHP >= 8.2
+- PHP >= 8.3
 - Symfony >= 7.4
 - Doctrine ORM >= 3.0 *(optional, required only for the built-in ORM filter strategies)*
 
@@ -169,18 +169,6 @@ Request ──> FiltersValueResolver ──> Filters VO ──> FilterApplierInt
           reads #[ApiFilter]                    dispatches to strategies
           validates types/enums                 by filter type (eq, neq, like, ...)
 ```
-
-### Namespace overview
-
-| Namespace | Role |
-|---|---|
-| `Attribute\` | `#[ApiFilter]` PHP attribute |
-| `ValueObject\` | `Filter`, `Filters`, `FilterType` enum |
-| `Resolver\` | `FiltersValueResolver` - HTTP request to `Filters` value object |
-| `Filter\` | Generic interfaces (`FilterApplierInterface`, `FilterStrategyInterface`) |
-| `Filter\ORM\` | Doctrine ORM implementation (`OrmFilterApplier`) |
-| `Filter\ORM\Strategy\` | Built-in strategies: `EqFilterStrategy`, `NeqFilterStrategy`, `LikeFilterStrategy` |
-| `Exception\` | `InvalidFilterException` (400), `DuplicateFilterStrategyException` (logic error) |
 
 ### Key design decisions
 

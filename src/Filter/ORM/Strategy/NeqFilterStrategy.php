@@ -15,10 +15,8 @@ final class NeqFilterStrategy implements FilterStrategyInterface
         return FilterType::Neq->value;
     }
 
-    public function apply(object $queryBuilder, string $column, mixed $value, string $parameterName): void
+    public function apply(QueryBuilder $queryBuilder, string $column, mixed $value, string $parameterName): void
     {
-        \assert($queryBuilder instanceof QueryBuilder);
-
         if (\is_array($value)) {
             if ([] === $value) {
                 return;

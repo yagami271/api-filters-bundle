@@ -6,7 +6,7 @@ Thank you for considering contributing to API Filters Bundle! This guide will he
 
 ### Prerequisites
 
-- PHP >= 8.2
+- PHP >= 8.3
 - Composer
 
 ### Getting started

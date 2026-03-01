@@ -32,7 +32,6 @@ final class OrmFilterIntegrationTest extends TestCase
             paths: [__DIR__.'/Entity'],
             isDevMode: true,
         );
-
         $connection = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'memory' => true,

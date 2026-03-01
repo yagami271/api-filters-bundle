@@ -18,10 +18,8 @@ final class LikeFilterStrategy implements FilterStrategyInterface
     /**
      * @param string|string[] $value
      */
-    public function apply(object $queryBuilder, string $column, mixed $value, string $parameterName): void
+    public function apply(QueryBuilder $queryBuilder, string $column, mixed $value, string $parameterName): void
     {
-        \assert($queryBuilder instanceof QueryBuilder);
-
         if (\is_array($value)) {
             $orConditions = [];
             foreach ($value as $i => $item) {
