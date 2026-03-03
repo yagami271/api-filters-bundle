@@ -1,0 +1,10 @@
+services:
+    Isma\ApiFiltersBundle\Tests\Integration\Resolver\IntegrationController:
+        autoconfigure: true
+        autowire: true
+        tags: ['controller.service_arguments']
+
+    Isma\ApiFiltersBundle\Tests\Integration\Resolver\InvokableIntegrationController:
+        autoconfigure: true
+        autowire: true
+        tags: ['controller.service_arguments']

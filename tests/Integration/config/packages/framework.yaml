@@ -1,0 +1,4 @@
+framework:
+    test: true
+    secret: 'test'
+    handle_all_throwables: true
