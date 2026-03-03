@@ -27,12 +27,16 @@ class TestUser
     #[ORM\Column(type: 'string', enumType: UserStatus::class)]
     private UserStatus $status;
 
-    public function __construct(string $firstname, string $lastname, string $email, UserStatus $status)
+    #[ORM\Column(nullable: true)]
+    private ?int $age = null;
+
+    public function __construct(string $firstname, string $lastname, string $email, UserStatus $status, ?int $age = null)
     {
         $this->firstname = $firstname;
         $this->lastname = $lastname;
         $this->email = $email;
         $this->status = $status;
+        $this->age = $age;
     }
 
     public function getId(): ?int
@@ -58,5 +62,10 @@ class TestUser
     public function getStatus(): UserStatus
     {
         return $this->status;
+    }
+
+    public function getAge(): ?int
+    {
+        return $this->age;
     }
 }
