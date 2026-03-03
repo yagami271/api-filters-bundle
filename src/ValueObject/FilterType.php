@@ -11,4 +11,18 @@ enum FilterType: string
     case Neq = 'neq';
 
     case Like = 'like';
+
+    case Gt = 'gt';
+
+    case Gte = 'gte';
+
+    case Lt = 'lt';
+
+    case Lte = 'lte';
+
+    case IsNull = 'is_null';
+
+    case StartWith = 'start_with';
+
+    case EndWith = 'end_with';
 }
