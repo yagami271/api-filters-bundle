@@ -25,4 +25,6 @@ enum FilterType: string
     case StartWith = 'start_with';
 
     case EndWith = 'end_with';
+
+    case Order = 'order';
 }

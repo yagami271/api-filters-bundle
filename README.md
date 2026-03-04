@@ -171,6 +171,8 @@ final class BetweenFilterStrategy implements FilterStrategyInterface
 
 The strategy is automatically tagged with `isma_api_filters.strategy` and collected by `OrmFilterApplier`. No manual service registration needed.
 
+> **💡 Naming convention:** To avoid any collision with current or future built-in filter types, prefix your custom filter names with `x-` (e.g. `x-between`, `x-fulltext`). This ensures your custom strategies will never conflict with a type added to the bundle in a later version.
+
 You can then use it immediately:
 
 ```
@@ -224,6 +226,12 @@ GET /api/users?filters[age][between][]=18&filters[age][between][]=65
 | Malformed filter format | `InvalidFilterException` | 400 |
 | Missing field mapping in `apply()` | `\InvalidArgumentException` | 500 |
 | Duplicate strategy for same type | `DuplicateFilterStrategyException` | Container build error |
+
+## 🗺️ Roadmap
+
+- **DBAL filter support** — Add filter strategies for Doctrine DBAL `QueryBuilder`, enabling usage without the ORM layer.
+- **Pure SQL filter support** — Add filter strategies for raw SQL queries (PDO / native connections), for projects that don't use Doctrine at all.
+- **More filter types** — Expand the built-in strategy catalog (e.g. `not_between`, `in_range`, `is_empty`, full-text search, etc.).
 
 ## 📄 License
 
