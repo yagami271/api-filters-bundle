@@ -19,6 +19,7 @@ use Isma\ApiFiltersBundle\Filter\ORM\Strategy\LikeFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\LteFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\LtFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\NeqFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\ORM\Strategy\OrderFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\StartWithFilterStrategy;
 use Isma\ApiFiltersBundle\Tests\Integration\Filter\ORM\Entity\TestUser;
 use Isma\ApiFiltersBundle\Tests\Integration\Filter\ORM\Entity\UserStatus;
@@ -63,6 +64,7 @@ trait OrmFilterTestTrait
             new IsNullFilterStrategy(),
             new StartWithFilterStrategy(),
             new EndWithFilterStrategy(),
+            new OrderFilterStrategy(),
         ]);
     }
 
