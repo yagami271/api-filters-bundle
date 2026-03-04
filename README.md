@@ -61,6 +61,7 @@ GET /api/users?filters[age][gte]=18
 GET /api/users?filters[age][lt]=65
 GET /api/users?filters[deleted_at][is_null]=true
 GET /api/users?filters[firstname][eq]=John&filters[lastname][eq]=Doe
+GET /api/users?filters[firstname][order]=asc
 ```
 
 Filters also support arrays (for `eq`, `neq`, `like`, `start_with`, `end_with`):
@@ -123,7 +124,7 @@ The value is validated against the enum cases. Invalid values return a `400 Bad 
 
 ## 🔎 Built-in filter types
 
-The bundle ships with 10 ORM filter strategies:
+The bundle ships with 11 ORM filter strategies:
 
 | Type | Query string | Scalar DQL | Array DQL |
 |---|---|---|---|
@@ -137,12 +138,14 @@ The bundle ships with 10 ORM filter strategies:
 | `lt` | `filters[field][lt]=value` | `field < :param` | ❌ throws exception |
 | `lte` | `filters[field][lte]=value` | `field <= :param` | ❌ throws exception |
 | `is_null` | `filters[field][is_null]=true` | `field IS NULL` / `field IS NOT NULL` | ❌ throws exception |
+| `order` | `filters[field][order]=asc` | `ORDER BY field ASC/DESC` | ❌ throws exception |
 
 **Notes:**
 - `like`, `start_with`, and `end_with` automatically escape `%` and `_` characters in user input.
 - Empty arrays are silently skipped for `eq` and `neq` (no condition is added).
-- `gt`, `gte`, `lt`, `lte`, and `is_null` only accept scalar values — passing an array throws an `\InvalidArgumentException`.
+- `gt`, `gte`, `lt`, `lte`, `is_null`, and `order` only accept scalar values — passing an array throws an `\InvalidArgumentException`.
 - `is_null` accepts `"true"`, `"1"`, or `true` for IS NULL, anything else for IS NOT NULL.
+- `order` accepts only `"asc"` or `"desc"` (case-insensitive) and adds an `ORDER BY` clause instead of a `WHERE` condition.
 
 ## 🧩 Creating a custom filter strategy
 
