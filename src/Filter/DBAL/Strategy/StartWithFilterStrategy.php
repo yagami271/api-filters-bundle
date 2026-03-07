@@ -24,18 +24,18 @@ final class StartWithFilterStrategy implements DbalFilterStrategyInterface
             $orConditions = [];
             foreach ($value as $i => $item) {
                 $param = $parameterName.'_'.$i;
-                $orConditions[] = \sprintf('%s LIKE :%s ESCAPE \'\\\'', $column, $param);
+                $orConditions[] = \sprintf('%s LIKE :%s ESCAPE \'!\'', $column, $param);
                 $queryBuilder->setParameter($param, $this->escapeWildcards($item).'%');
             }
             $queryBuilder->andWhere($queryBuilder->expr()->or(...$orConditions));
         } else {
-            $queryBuilder->andWhere(\sprintf('%s LIKE :%s ESCAPE \'\\\'', $column, $parameterName))
+            $queryBuilder->andWhere(\sprintf('%s LIKE :%s ESCAPE \'!\'', $column, $parameterName))
                 ->setParameter($parameterName, $this->escapeWildcards($value).'%');
         }
     }
 
     private function escapeWildcards(string $value): string
     {
-        return str_replace(['%', '_'], ['\\%', '\\_'], $value);
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
     }
 }

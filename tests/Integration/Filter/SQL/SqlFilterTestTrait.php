@@ -17,6 +17,7 @@ use Isma\ApiFiltersBundle\Filter\SQL\Strategy\LtFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\NeqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\OrderFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\StartWithFilterStrategy;
+use Isma\ApiFiltersBundle\Tests\Integration\DatabaseConnectionFactory;
 use Isma\ApiFiltersBundle\ValueObject\Filters;
 
 trait SqlFilterTestTrait
@@ -26,19 +27,13 @@ trait SqlFilterTestTrait
 
     protected function setUp(): void
     {
-        $this->pdo = new \PDO('sqlite::memory:');
+        $factory = new DatabaseConnectionFactory();
+
+        $this->pdo = new \PDO($factory->getPdoDsn(), $factory->getPdoUser(), $factory->getPdoPassword());
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $this->pdo->exec('
-            CREATE TABLE test_users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                firstname VARCHAR(255) NOT NULL,
-                lastname VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                status VARCHAR(255) NOT NULL,
-                age INTEGER DEFAULT NULL
-            )
-        ');
+        $this->pdo->exec('DROP TABLE IF EXISTS test_users');
+        $this->pdo->exec($factory->getCreateTableSql());
 
         $this->insertFixtures();
 
