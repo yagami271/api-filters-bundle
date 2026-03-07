@@ -24,12 +24,12 @@ final class StartWithFilterStrategy implements SqlFilterStrategyInterface
             $orConditions = [];
             foreach ($value as $i => $item) {
                 $param = $parameterName.'_'.$i;
-                $orConditions[] = \sprintf('%s LIKE :%s', $column, $param);
+                $orConditions[] = \sprintf('%s LIKE :%s ESCAPE \'\\\'', $column, $param);
                 $context->setParameter($param, $this->escapeWildcards($item).'%');
             }
             $context->andWhere('('.implode(' OR ', $orConditions).')');
         } else {
-            $context->andWhere(\sprintf('%s LIKE :%s', $column, $parameterName))
+            $context->andWhere(\sprintf('%s LIKE :%s ESCAPE \'\\\'', $column, $parameterName))
                 ->setParameter($parameterName, $this->escapeWildcards($value).'%');
         }
     }
