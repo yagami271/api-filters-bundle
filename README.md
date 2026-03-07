@@ -10,6 +10,7 @@ A Symfony bundle that resolves API query filters from HTTP requests and applies 
 - Symfony 6.4 / 7.4 / 8.0+
 - Doctrine ORM >= 3.4 *(required for the built-in ORM filter strategies)*
 - Doctrine DBAL >= 4.0 *(required for the built-in DBAL filter strategies)*
+- PDO *(required for the built-in Pure SQL filter strategies — no Doctrine dependency)*
 
 ## 📦 Installation
 
@@ -155,9 +156,54 @@ final class UserRepository
 }
 ```
 
+### 5. Apply filters using Pure SQL (PDO — no Doctrine required)
+
+If your project doesn't use Doctrine at all, you can use the Pure SQL filter applier with a raw PDO connection:
+
+```php
+use Isma\ApiFiltersBundle\Filter\SQL\SqlFilterApplierInterface;
+use Isma\ApiFiltersBundle\Filter\SQL\SqlQueryContext;
+
+final class UserRepository
+{
+    public function __construct(
+        private SqlFilterApplierInterface $filterApplier,
+        private \PDO $pdo,
+    ) {
+    }
+
+    public function findByFilters(Filters $filters): array
+    {
+        $context = new SqlQueryContext();
+
+        $this->filterApplier->apply($context, $filters, [
+            'firstname' => 'firstname',
+            'lastname'  => 'lastname',
+            'status'    => 'status',
+        ]);
+
+        $sql = 'SELECT * FROM users';
+        if ($where = $context->getWhereClause()) {
+            $sql .= ' WHERE ' . $where;
+        }
+        if ($orderBy = $context->getOrderByClause()) {
+            $sql .= ' ORDER BY ' . $orderBy;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($context->getParameters() as $name => $value) {
+            $stmt->bindValue(':' . $name, $value);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+}
+```
+
 ## 🔎 Built-in filter types
 
-The bundle ships with 11 filter strategies for both ORM and DBAL:
+The bundle ships with 11 filter strategies for ORM, DBAL, and Pure SQL:
 
 | Type | Query string | Scalar DQL | Array DQL |
 |---|---|---|---|
@@ -234,6 +280,33 @@ final class BetweenFilterStrategy implements DbalFilterStrategyInterface
 
 The strategy is automatically tagged with `isma_api_filters.dbal_strategy` and collected by `DbalFilterApplier`.
 
+### Creating a custom Pure SQL filter strategy
+
+For pure SQL (PDO), implement `SqlFilterStrategyInterface`:
+
+```php
+use Isma\ApiFiltersBundle\Filter\SQL\SqlFilterStrategyInterface;
+use Isma\ApiFiltersBundle\Filter\SQL\SqlQueryContext;
+
+final class BetweenFilterStrategy implements SqlFilterStrategyInterface
+{
+    public function getType(): string
+    {
+        return 'between';
+    }
+
+    public function apply(SqlQueryContext $context, string $column, mixed $value, string $parameterName): void
+    {
+        // Expects value as [min, max]
+        $context->andWhere(\sprintf('%s BETWEEN :%s_min AND :%s_max', $column, $parameterName, $parameterName))
+            ->setParameter($parameterName.'_min', $value[0])
+            ->setParameter($parameterName.'_max', $value[1]);
+    }
+}
+```
+
+The strategy is automatically tagged with `isma_api_filters.sql_strategy` and collected by `SqlFilterApplier`.
+
 > **Naming convention:** To avoid any collision with current or future built-in filter types, prefix your custom filter names with `x-` (e.g. `x-between`, `x-fulltext`). This ensures your custom strategies will never conflict with a type added to the bundle in a later version.
 
 You can then use it immediately:
@@ -255,7 +328,6 @@ GET /api/users?filters[age][between][]=18&filters[age][between][]=65
 
 ## 🗺️ Roadmap
 
-- **Pure SQL filter support** — Add filter strategies for raw SQL queries (PDO / native connections), for projects that don't use Doctrine at all.
 - **More filter types** — Expand the built-in strategy catalog (e.g. `not_between`, `in_range`, `is_empty`, full-text search, etc.).
 
 ## 📄 License
