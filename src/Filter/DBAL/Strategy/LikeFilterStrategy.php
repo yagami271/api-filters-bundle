@@ -24,12 +24,12 @@ final class LikeFilterStrategy implements DbalFilterStrategyInterface
             $orConditions = [];
             foreach ($value as $i => $item) {
                 $param = $parameterName.'_'.$i;
-                $orConditions[] = \sprintf('%s LIKE :%s', $column, $param);
+                $orConditions[] = \sprintf('%s LIKE :%s ESCAPE \'\\\'', $column, $param);
                 $queryBuilder->setParameter($param, '%'.$this->escapeWildcards($item).'%');
             }
             $queryBuilder->andWhere($queryBuilder->expr()->or(...$orConditions));
         } else {
-            $queryBuilder->andWhere(\sprintf('%s LIKE :%s', $column, $parameterName))
+            $queryBuilder->andWhere(\sprintf('%s LIKE :%s ESCAPE \'\\\'', $column, $parameterName))
                 ->setParameter($parameterName, '%'.$this->escapeWildcards($value).'%');
         }
     }
