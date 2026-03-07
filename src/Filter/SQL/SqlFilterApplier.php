@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Isma\ApiFiltersBundle\Filter\SQL;
+
+use Isma\ApiFiltersBundle\Exception\DuplicateFilterStrategyException;
+use Isma\ApiFiltersBundle\ValueObject\Filters;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+
+final class SqlFilterApplier implements SqlFilterApplierInterface
+{
+    /** @var array<string, SqlFilterStrategyInterface> */
+    private readonly array $strategies;
+
+    /**
+     * @param iterable<SqlFilterStrategyInterface> $strategies
+     */
+    public function __construct(
+        #[AutowireIterator('isma_api_filters.sql_strategy')]
+        iterable $strategies,
+    ) {
+        $map = [];
+        foreach ($strategies as $strategy) {
+            $type = $strategy->getType();
+            if (isset($map[$type])) {
+                throw new DuplicateFilterStrategyException(\sprintf('Duplicate filter strategy for type "%s": %s and %s.', $type, $map[$type]::class, $strategy::class));
+            }
+            $map[$type] = $strategy;
+        }
+        $this->strategies = $map;
+    }
+
+    public function apply(SqlQueryContext $context, Filters $filters, array $mapping): void
+    {
+        $uid = bin2hex(random_bytes(4));
+        $paramIndex = 0;
+
+        foreach ($filters->filters as $filter) {
+            if (!isset($mapping[$filter->name])) {
+                throw new \InvalidArgumentException(\sprintf('No mapping defined for filter "%s".', $filter->name));
+            }
+
+            if (!isset($this->strategies[$filter->type])) {
+                throw new \InvalidArgumentException(\sprintf('No filter strategy registered for type "%s".', $filter->type));
+            }
+
+            $column = $mapping[$filter->name];
+            $parameterName = \sprintf('filter_%s_%d', $uid, $paramIndex++);
+
+            $this->strategies[$filter->type]->apply($context, $column, $filter->value, $parameterName);
+        }
+    }
+}
