@@ -20,6 +20,7 @@
 
     <php>
         <env name="SHELL_VERBOSITY" value="-1"/>
+        <env name="DATABASE_DRIVER" value="sqlite"/>
     </php>
 
     <source>

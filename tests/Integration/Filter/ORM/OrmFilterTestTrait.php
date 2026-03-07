@@ -21,6 +21,7 @@ use Isma\ApiFiltersBundle\Filter\ORM\Strategy\LtFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\NeqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\OrderFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\StartWithFilterStrategy;
+use Isma\ApiFiltersBundle\Tests\Integration\DatabaseConnectionFactory;
 use Isma\ApiFiltersBundle\Tests\Integration\Filter\ORM\Entity\TestUser;
 use Isma\ApiFiltersBundle\Tests\Integration\Filter\ORM\Entity\UserStatus;
 use Isma\ApiFiltersBundle\ValueObject\Filters;
@@ -41,15 +42,20 @@ trait OrmFilterTestTrait
             $config->enableNativeLazyObjects(true);
         }
 
-        $connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ], $config);
+        $factory = new DatabaseConnectionFactory();
+
+        $connection = DriverManager::getConnection($factory->getDoctrineConnectionParams(), $config);
 
         $this->em = new EntityManager($connection, $config);
 
         $schemaTool = new SchemaTool($this->em);
-        $schemaTool->createSchema($this->em->getMetadataFactory()->getAllMetadata());
+        $metadata = $this->em->getMetadataFactory()->getAllMetadata();
+
+        if (!$factory->isSqlite()) {
+            $schemaTool->dropSchema($metadata);
+        }
+
+        $schemaTool->createSchema($metadata);
 
         $this->insertFixtures();
 

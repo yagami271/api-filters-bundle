@@ -45,6 +45,72 @@ jobs:
 
       - run: vendor/bin/phpunit
 
+  integration-tests:
+    name: Integration - ${{ matrix.database }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: mysql
+            image: 'mysql:8.4'
+            port: 3306
+            driver: mysql
+            env:
+              MYSQL_ROOT_PASSWORD: root
+              MYSQL_DATABASE: api_filters_test
+            health-cmd: mysqladmin ping -h 127.0.0.1 -uroot -proot
+          - database: pgsql
+            image: 'postgres:16-alpine'
+            port: 5432
+            driver: pgsql
+            env:
+              POSTGRES_USER: root
+              POSTGRES_PASSWORD: root
+              POSTGRES_DB: api_filters_test
+            health-cmd: pg_isready -U root -d api_filters_test
+          - database: mariadb
+            image: 'mariadb:11'
+            port: 3306
+            driver: mariadb
+            env:
+              MARIADB_ROOT_PASSWORD: root
+              MARIADB_DATABASE: api_filters_test
+            health-cmd: healthcheck.sh --connect --innodb_initialized
+
+    services:
+      database:
+        image: ${{ matrix.image }}
+        env: ${{ matrix.env }}
+        ports:
+          - ${{ matrix.port }}:${{ matrix.port }}
+        options: >-
+          --health-cmd="${{ matrix.health-cmd }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, pdo_pgsql, pdo_sqlite
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Run integration tests
+        run: vendor/bin/phpunit --testsuite integration
+        env:
+          DATABASE_DRIVER: ${{ matrix.driver }}
+          DATABASE_HOST: 127.0.0.1
+          DATABASE_PORT: ${{ matrix.port }}
+          DATABASE_NAME: api_filters_test
+          DATABASE_USER: root
+          DATABASE_PASSWORD: root
+
   phpstan:
     name: PHPStan
     runs-on: ubuntu-latest
