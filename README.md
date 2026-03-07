@@ -1,6 +1,11 @@
 # 🎯 API Filters Bundle
 
 [![CI](https://github.com/yagami271/api-filters-bundle/actions/workflows/ci.yaml/badge.svg)](https://github.com/yagami271/api-filters-bundle/actions/workflows/ci.yaml)
+[![PHP](https://img.shields.io/badge/PHP-≥8.3-8892BF?logo=php&logoColor=white)](https://www.php.net/)
+[![Symfony](https://img.shields.io/badge/Symfony-6.4%20|%207.4%20|%208.0-000000?logo=symfony&logoColor=white)](https://symfony.com/)
+[![License](https://img.shields.io/github/license/yagami271/api-filters-bundle)](LICENSE)
+[![PHPStan](https://img.shields.io/badge/PHPStan-level%20max-brightgreen)](https://phpstan.org/)
+[![Code Style](https://img.shields.io/badge/code%20style-%40Symfony-black)](https://cs.symfony.com/)
 
 A Symfony bundle that resolves API query filters from HTTP requests and applies them to query builders using a strategy pattern. Declare allowed filters with PHP attributes on your controller actions, and the bundle handles parsing, validation, and query building automatically.
 

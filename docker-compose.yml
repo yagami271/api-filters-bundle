@@ -1,0 +1,10 @@
+services:
+  php:
+    build: .
+    container_name: api-filters-bundle-php
+    volumes:
+      - .:/app:rw,cached
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    command: ["sleep", "infinity"]
