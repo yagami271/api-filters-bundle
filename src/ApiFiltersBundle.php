@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Isma\ApiFiltersBundle;
 
+use Isma\ApiFiltersBundle\Filter\DBAL\DbalFilterApplier;
+use Isma\ApiFiltersBundle\Filter\DBAL\DbalFilterApplierInterface;
+use Isma\ApiFiltersBundle\Filter\DBAL\DbalFilterStrategyInterface;
 use Isma\ApiFiltersBundle\Filter\FilterApplierInterface;
 use Isma\ApiFiltersBundle\Filter\FilterStrategyInterface;
 use Isma\ApiFiltersBundle\Filter\ORM\OrmFilterApplier;
@@ -31,9 +34,14 @@ class ApiFiltersBundle extends AbstractBundle
             ->autoconfigure();
 
         $services->load('Isma\\ApiFiltersBundle\\Resolver\\', '../src/Resolver/');
-        $services->load('Isma\\ApiFiltersBundle\\Filter\\ORM\\', '../src/Filter/ORM/');
+        $services->load('Isma\\ApiFiltersBundle\\Filter\\', '../src/Filter/');
 
         $services->alias(FilterApplierInterface::class, OrmFilterApplier::class);
+
+        $builder->registerForAutoconfiguration(DbalFilterStrategyInterface::class)
+            ->addTag('isma_api_filters.dbal_strategy');
+
+        $services->alias(DbalFilterApplierInterface::class, DbalFilterApplier::class);
     }
 
     public function getPath(): string

@@ -9,6 +9,7 @@ A Symfony bundle that resolves API query filters from HTTP requests and applies 
 - PHP >= 8.3
 - Symfony 6.4 / 7.4 / 8.0+
 - Doctrine ORM >= 3.4 *(required for the built-in ORM filter strategies)*
+- Doctrine DBAL >= 4.0 *(required for the built-in DBAL filter strategies)*
 
 ## 📦 Installation
 
@@ -122,9 +123,41 @@ If a client sends a disallowed type, a `400 Bad Request` is returned.
 
 The value is validated against the enum cases. Invalid values return a `400 Bad Request`.
 
+### 4. Apply filters using DBAL (without ORM)
+
+If you don't use Doctrine ORM, you can use the DBAL filter applier with a raw `Doctrine\DBAL\Query\QueryBuilder`:
+
+```php
+use Isma\ApiFiltersBundle\Filter\DBAL\DbalFilterApplierInterface;
+
+final class UserRepository
+{
+    public function __construct(
+        private DbalFilterApplierInterface $filterApplier,
+        private Connection $connection,
+    ) {
+    }
+
+    public function findByFilters(Filters $filters): array
+    {
+        $qb = $this->connection->createQueryBuilder()
+            ->select('t.*')
+            ->from('users', 't');
+
+        $this->filterApplier->apply($qb, $filters, [
+            'firstname' => 't.firstname',
+            'lastname'  => 't.lastname',
+            'status'    => 't.status',
+        ]);
+
+        return $qb->executeQuery()->fetchAllAssociative();
+    }
+}
+```
+
 ## 🔎 Built-in filter types
 
-The bundle ships with 11 ORM filter strategies:
+The bundle ships with 11 filter strategies for both ORM and DBAL:
 
 | Type | Query string | Scalar DQL | Array DQL |
 |---|---|---|---|
@@ -174,50 +207,40 @@ final class BetweenFilterStrategy implements FilterStrategyInterface
 
 The strategy is automatically tagged with `isma_api_filters.strategy` and collected by `OrmFilterApplier`. No manual service registration needed.
 
-> **💡 Naming convention:** To avoid any collision with current or future built-in filter types, prefix your custom filter names with `x-` (e.g. `x-between`, `x-fulltext`). This ensures your custom strategies will never conflict with a type added to the bundle in a later version.
+### Creating a custom DBAL filter strategy
+
+For DBAL, implement `DbalFilterStrategyInterface`:
+
+```php
+use Doctrine\DBAL\Query\QueryBuilder;
+use Isma\ApiFiltersBundle\Filter\DBAL\DbalFilterStrategyInterface;
+
+final class BetweenFilterStrategy implements DbalFilterStrategyInterface
+{
+    public function getType(): string
+    {
+        return 'between';
+    }
+
+    public function apply(QueryBuilder $queryBuilder, string $column, mixed $value, string $parameterName): void
+    {
+        // Expects value as [min, max]
+        $queryBuilder->andWhere(\sprintf('%s BETWEEN :%s_min AND :%s_max', $column, $parameterName, $parameterName))
+            ->setParameter($parameterName.'_min', $value[0])
+            ->setParameter($parameterName.'_max', $value[1]);
+    }
+}
+```
+
+The strategy is automatically tagged with `isma_api_filters.dbal_strategy` and collected by `DbalFilterApplier`.
+
+> **Naming convention:** To avoid any collision with current or future built-in filter types, prefix your custom filter names with `x-` (e.g. `x-between`, `x-fulltext`). This ensures your custom strategies will never conflict with a type added to the bundle in a later version.
 
 You can then use it immediately:
 
 ```
 GET /api/users?filters[age][between][]=18&filters[age][between][]=65
 ```
-
-## 🏗️ Architecture
-
-```
-                          ┌─────────────────────┐
-                          │    HTTP Request      │
-                          │ ?filters[f][type]=v  │
-                          └─────────┬───────────┘
-                                    │
-                                    ▼
-                       ┌────────────────────────┐
-                       │  FiltersValueResolver   │
-                       │  reads #[ApiFilter]     │
-                       │  validates types/enums  │
-                       └─────────┬──────────────┘
-                                 │
-                                 ▼
-                          ┌────────────┐
-                          │ Filters VO │
-                          └──────┬─────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────┐
-                    │  OrmFilterApplier      │
-                    │  (FilterApplierInterface)│
-                    └─────────┬──────────────┘
-                              │ dispatches by type
-              ┌───────┬──────┼──────┬───────┬────────┐
-              ▼       ▼      ▼      ▼       ▼        ▼
-            eq      neq    like    gt     is_null   ...
-```
-
-### 🔑 Key design decisions
-
-- **Strategy pattern** — Each filter type (`eq`, `like`, `gt`, …) is a separate class implementing `FilterStrategyInterface`. Adding a new filter = adding one class.
-- **Strategy auto-configuration** — Any class implementing `FilterStrategyInterface` is automatically tagged (`isma_api_filters.strategy`) and collected by `OrmFilterApplier`. No YAML/XML wiring needed.
-- **Doctrine ORM integration** — `FilterStrategyInterface` and `FilterApplierInterface` use `Doctrine\ORM\QueryBuilder`. Doctrine ORM is a required dependency.
 
 ## ⚠️ Error handling
 
@@ -232,7 +255,6 @@ GET /api/users?filters[age][between][]=18&filters[age][between][]=65
 
 ## 🗺️ Roadmap
 
-- **DBAL filter support** — Add filter strategies for Doctrine DBAL `QueryBuilder`, enabling usage without the ORM layer.
 - **Pure SQL filter support** — Add filter strategies for raw SQL queries (PDO / native connections), for projects that don't use Doctrine at all.
 - **More filter types** — Expand the built-in strategy catalog (e.g. `not_between`, `in_range`, `is_empty`, full-text search, etc.).
 
