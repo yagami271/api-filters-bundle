@@ -11,7 +11,9 @@ use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\EndWithFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\EqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\GteFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\GtFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\IeqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\IlikeFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\InoteqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\InotlikeFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\IsNullFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\DBAL\Strategy\LikeFilterStrategy;
@@ -45,6 +47,8 @@ trait DbalFilterTestTrait
             new LikeFilterStrategy(),
             new IlikeFilterStrategy(),
             new InotlikeFilterStrategy(),
+            new IeqFilterStrategy(),
+            new InoteqFilterStrategy(),
             new GtFilterStrategy(),
             new GteFilterStrategy(),
             new LtFilterStrategy(),

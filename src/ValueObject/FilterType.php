@@ -30,5 +30,9 @@ enum FilterType: string
 
     case Inotlike = 'inotlike';
 
+    case Ieq = 'ieq';
+
+    case Inoteq = 'inoteq';
+
     case Order = 'order';
 }
