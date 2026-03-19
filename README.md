@@ -63,6 +63,8 @@ GET /api/users?filters[firstname][eq]=John
 GET /api/users?filters[firstname][like]=Joh
 GET /api/users?filters[firstname][ilike]=joh
 GET /api/users?filters[firstname][inotlike]=admin
+GET /api/users?filters[firstname][ieq]=john
+GET /api/users?filters[firstname][inoteq]=john
 GET /api/users?filters[firstname][start_with]=Jo
 GET /api/users?filters[email][end_with]=@example.com
 GET /api/users?filters[status][eq]=active
@@ -73,7 +75,7 @@ GET /api/users?filters[firstname][eq]=John&filters[lastname][eq]=Doe
 GET /api/users?filters[firstname][order]=asc
 ```
 
-Filters also support arrays (for `eq`, `neq`, `like`, `ilike`, `inotlike`, `start_with`, `end_with`):
+Filters also support arrays (for `eq`, `neq`, `like`, `ilike`, `inotlike`, `ieq`, `inoteq`, `start_with`, `end_with`):
 
 ```
 GET /api/users?filters[status][eq][]=active&filters[status][eq][]=inactive
@@ -210,7 +212,7 @@ final class UserRepository
 
 ## 🔎 Built-in filter types
 
-The bundle ships with 13 filter strategies for ORM, DBAL, and Pure SQL:
+The bundle ships with 15 filter strategies for ORM, DBAL, and Pure SQL:
 
 | Type | Query string | Scalar DQL | Array DQL |
 |---|---|---|---|
@@ -219,6 +221,8 @@ The bundle ships with 13 filter strategies for ORM, DBAL, and Pure SQL:
 | `like` | `filters[field][like]=value` | `field LIKE '%val%'` | OR of `LIKE` clauses |
 | `ilike` | `filters[field][ilike]=value` | `LOWER(field) LIKE LOWER('%val%')` | OR of `LIKE` clauses |
 | `inotlike` | `filters[field][inotlike]=value` | `LOWER(field) NOT LIKE LOWER('%val%')` | AND of `NOT LIKE` clauses |
+| `ieq` | `filters[field][ieq]=value` | `LOWER(field) = :param` | `LOWER(field) IN (:param)` |
+| `inoteq` | `filters[field][inoteq]=value` | `LOWER(field) != :param` | `LOWER(field) NOT IN (:param)` |
 | `start_with` | `filters[field][start_with]=value` | `field LIKE 'val%'` | OR of `LIKE` clauses |
 | `end_with` | `filters[field][end_with]=value` | `field LIKE '%val'` | OR of `LIKE` clauses |
 | `gt` | `filters[field][gt]=value` | `field > :param` | ❌ throws exception |
@@ -230,7 +234,8 @@ The bundle ships with 13 filter strategies for ORM, DBAL, and Pure SQL:
 
 **Notes:**
 - `like`, `ilike`, `inotlike`, `start_with`, and `end_with` automatically escape `%` and `_` characters in user input.
-- Empty arrays are silently skipped for `eq` and `neq` (no condition is added).
+- Empty arrays are silently skipped for `eq`, `neq`, `ieq`, and `inoteq` (no condition is added).
+- `ieq` and `inoteq` only accept string values (or arrays of strings) — passing a non-string value throws an `\InvalidArgumentException`.
 - `gt`, `gte`, `lt`, `lte`, `is_null`, and `order` only accept scalar values — passing an array throws an `\InvalidArgumentException`.
 - `is_null` accepts `"true"`, `"1"`, or `true` for IS NULL, anything else for IS NOT NULL.
 - `order` accepts only `"asc"` or `"desc"` (case-insensitive) and adds an `ORDER BY` clause instead of a `WHERE` condition.

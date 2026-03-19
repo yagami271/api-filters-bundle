@@ -14,7 +14,9 @@ use Isma\ApiFiltersBundle\Filter\ORM\Strategy\EndWithFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\EqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\GteFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\GtFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\ORM\Strategy\IeqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\IlikeFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\ORM\Strategy\InoteqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\InotlikeFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\IsNullFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\ORM\Strategy\LikeFilterStrategy;
@@ -67,6 +69,8 @@ trait OrmFilterTestTrait
             new LikeFilterStrategy(),
             new IlikeFilterStrategy(),
             new InotlikeFilterStrategy(),
+            new IeqFilterStrategy(),
+            new InoteqFilterStrategy(),
             new GtFilterStrategy(),
             new GteFilterStrategy(),
             new LtFilterStrategy(),
