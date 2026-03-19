@@ -10,6 +10,8 @@ use Isma\ApiFiltersBundle\Filter\SQL\Strategy\EndWithFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\EqFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\GteFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\GtFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\SQL\Strategy\IlikeFilterStrategy;
+use Isma\ApiFiltersBundle\Filter\SQL\Strategy\InotlikeFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\IsNullFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\LikeFilterStrategy;
 use Isma\ApiFiltersBundle\Filter\SQL\Strategy\LteFilterStrategy;
@@ -41,6 +43,8 @@ trait SqlFilterTestTrait
             new EqFilterStrategy(),
             new NeqFilterStrategy(),
             new LikeFilterStrategy(),
+            new IlikeFilterStrategy(),
+            new InotlikeFilterStrategy(),
             new GtFilterStrategy(),
             new GteFilterStrategy(),
             new LtFilterStrategy(),

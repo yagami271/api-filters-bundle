@@ -26,5 +26,9 @@ enum FilterType: string
 
     case EndWith = 'end_with';
 
+    case Ilike = 'ilike';
+
+    case Inotlike = 'inotlike';
+
     case Order = 'order';
 }
