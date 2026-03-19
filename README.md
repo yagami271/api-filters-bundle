@@ -61,6 +61,8 @@ final class UserController
 ```
 GET /api/users?filters[firstname][eq]=John
 GET /api/users?filters[firstname][like]=Joh
+GET /api/users?filters[firstname][ilike]=joh
+GET /api/users?filters[firstname][inotlike]=admin
 GET /api/users?filters[firstname][start_with]=Jo
 GET /api/users?filters[email][end_with]=@example.com
 GET /api/users?filters[status][eq]=active
@@ -71,7 +73,7 @@ GET /api/users?filters[firstname][eq]=John&filters[lastname][eq]=Doe
 GET /api/users?filters[firstname][order]=asc
 ```
 
-Filters also support arrays (for `eq`, `neq`, `like`, `start_with`, `end_with`):
+Filters also support arrays (for `eq`, `neq`, `like`, `ilike`, `inotlike`, `start_with`, `end_with`):
 
 ```
 GET /api/users?filters[status][eq][]=active&filters[status][eq][]=inactive
@@ -208,13 +210,15 @@ final class UserRepository
 
 ## 🔎 Built-in filter types
 
-The bundle ships with 11 filter strategies for ORM, DBAL, and Pure SQL:
+The bundle ships with 13 filter strategies for ORM, DBAL, and Pure SQL:
 
 | Type | Query string | Scalar DQL | Array DQL |
 |---|---|---|---|
 | `eq` | `filters[field][eq]=value` | `field = :param` | `field IN (:param)` |
 | `neq` | `filters[field][neq]=value` | `field != :param` | `field NOT IN (:param)` |
 | `like` | `filters[field][like]=value` | `field LIKE '%val%'` | OR of `LIKE` clauses |
+| `ilike` | `filters[field][ilike]=value` | `LOWER(field) LIKE LOWER('%val%')` | OR of `LIKE` clauses |
+| `inotlike` | `filters[field][inotlike]=value` | `LOWER(field) NOT LIKE LOWER('%val%')` | AND of `NOT LIKE` clauses |
 | `start_with` | `filters[field][start_with]=value` | `field LIKE 'val%'` | OR of `LIKE` clauses |
 | `end_with` | `filters[field][end_with]=value` | `field LIKE '%val'` | OR of `LIKE` clauses |
 | `gt` | `filters[field][gt]=value` | `field > :param` | ❌ throws exception |
@@ -225,7 +229,7 @@ The bundle ships with 11 filter strategies for ORM, DBAL, and Pure SQL:
 | `order` | `filters[field][order]=asc` | `ORDER BY field ASC/DESC` | ❌ throws exception |
 
 **Notes:**
-- `like`, `start_with`, and `end_with` automatically escape `%` and `_` characters in user input.
+- `like`, `ilike`, `inotlike`, `start_with`, and `end_with` automatically escape `%` and `_` characters in user input.
 - Empty arrays are silently skipped for `eq` and `neq` (no condition is added).
 - `gt`, `gte`, `lt`, `lte`, `is_null`, and `order` only accept scalar values — passing an array throws an `\InvalidArgumentException`.
 - `is_null` accepts `"true"`, `"1"`, or `true` for IS NULL, anything else for IS NOT NULL.
